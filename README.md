@@ -19,7 +19,7 @@ This guide will help you set up the full stack project, covering all possible er
 
    - Open your terminal and navigate to the client directory of your project:
      ```sh
-     cd path/to/your/project/client
+     cd /client
      ```
 
 3. **Install Dependencies**
@@ -84,7 +84,7 @@ This guide will help you set up the full stack project, covering all possible er
 
    - Open your terminal and navigate to the backend directory of your project:
      ```sh
-     cd path/to/your/project/backend
+     cd /backend
      ```
 
 6. **Create Environment Variables File**
