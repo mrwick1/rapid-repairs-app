@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import connection from "../db/connection";
 import mysql from "mysql2/promise";
 import jwt from "jsonwebtoken";
+import { decodeToken } from "../helpers/utils";
 
 export const getAllFeedbacks = async (req: Request, res: Response) => {
   try {
@@ -20,7 +21,10 @@ export const addFeedback = async (req: Request, res: Response) => {
   try {
     await db.beginTransaction();
 
-    const tokenValid = jwt.verify(token, process.env.JWT_SECRET);
+    const tokenValid = jwt.verify(
+      token,
+      process.env.SECRET_KEY || "johnWick123"
+    );
 
     const customer_id = tokenValid["user_id"];
 
@@ -35,7 +39,7 @@ export const addFeedback = async (req: Request, res: Response) => {
     }
 
     const [result] = await db.execute(
-      "INSERT INTO feedback (feedback, star_rating, service_provider_id, customer_id, job_id) VALUES (?, ?, ?, ?)",
+      "INSERT INTO feedback (feedback, star_rating, service_provider_id, customer_id, job_id) VALUES (?, ?, ?, ?, ?)",
       [feedback, star_rating, service_provider_id, customer_id, job_id]
     );
 
@@ -46,7 +50,7 @@ export const addFeedback = async (req: Request, res: Response) => {
         FROM
         feedback
         WHERE
-        user_id = ?
+        service_provider_id = ?
         `,
       [service_provider_id]
     );
@@ -92,7 +96,7 @@ export const deleteFeedbackByUserId = async (req: Request, res: Response) => {
   try {
     const db = await connection();
     const [result] = await db.execute<mysql.ResultSetHeader>(
-      "DELETE FROM feedback WHERE user_id = ?",
+      "DELETE FROM feedback WHERE service_provider_id = ?",
       [userId]
     );
     if (result.affectedRows === 0) {
@@ -106,13 +110,25 @@ export const deleteFeedbackByUserId = async (req: Request, res: Response) => {
 };
 
 export const getFeedbackByUserId = async (req: Request, res: Response) => {
-  const { userId } = req.params;
-
+  const headerToken = req.headers["authorization"];
+  const decodedToken = decodeToken(headerToken);
+  const userId = decodedToken["user_id"];
   try {
     const db = await connection();
-    const [rows] = await db.query("SELECT * FROM feedback WHERE user_id = ?", [
-      userId,
-    ]);
+    const [rows] = await db.query(
+      `SELECT
+    feedback.*,
+    customer_details.name AS customer_name,
+    customer_details.email AS customer_email,
+    customer_details.phone AS customer_phone
+    FROM
+    feedback
+    JOIN
+    customer_details ON feedback.customer_id = customer_details.user_id
+    WHERE
+    feedback.service_provider_id = ?`,
+      [userId]
+    );
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });

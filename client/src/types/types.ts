@@ -113,3 +113,15 @@ export interface ErrorResponse {
   };
   message?: string;
 }
+
+export type FeedbackWithCustomerDetails = {
+  feedback_id: number;
+  job_id: number;
+  service_provider_id: number;
+  customer_id: number;
+  feedback: string;
+  star_rating: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+};

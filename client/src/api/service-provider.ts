@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import instance from "../config/axios";
-import { ServiceJob } from "../types/types";
+import { ServiceJob, FeedbackWithCustomerDetails } from "../types/types";
 
 export const getUserById = async (id: string) => {
   const response = await instance({
@@ -26,10 +26,12 @@ export const getJobs = async (): Promise<AxiosResponse<ServiceJob[]>> => {
   return response;
 };
 
-export const getFeedback = async (id: string) => {
+export const getFeedback = async (): Promise<
+  AxiosResponse<FeedbackWithCustomerDetails[]>
+> => {
   const response = await instance({
     method: "GET",
-    url: "/api/feedback/get-feedback/" + id,
+    url: "/api/feedback/get-my-feedback",
   });
   return response;
 };
@@ -39,8 +41,8 @@ export const updateLocationSP = async (data: {
   longitude: string;
 }) => {
   const response = await instance({
-    method: 'POST',
-    url: '/api/user/update-provider-location',
+    method: "POST",
+    url: "/api/user/update-provider-location",
     data,
   });
   return response;

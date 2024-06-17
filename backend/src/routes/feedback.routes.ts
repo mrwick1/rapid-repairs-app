@@ -15,13 +15,7 @@ import {
 
 const router = Router();
 
-router.post(
-  "/add-feedback",
-  validateToken,
-  authGuard(["admin", "customer"]),
-  validateData(addFeedbackSchema),
-  addFeedback
-);
+router.post("/add-feedback", addFeedback);
 
 router.get(
   "/get-feedback",
@@ -31,9 +25,9 @@ router.get(
 );
 
 router.get(
-  "/get-feedback/:userId",
+  "/get-my-feedback",
   validateToken,
-  authGuard(["admin", "customer"]),
+  authGuard(["admin", "service_provider"]),
   getFeedbackByUserId
 );
 router.get(

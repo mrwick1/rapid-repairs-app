@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
-import connection from '../db/connection';
-import mysql from 'mysql2/promise';
-import { getDistance } from 'geolib';
-import { send } from '../mailer';
-import { decodeToken } from '../helpers/utils';
-import { ServiceProviderDetails } from '../types';
-import { generateJobCompletionEmail } from '../templates/completeJobTemplate';
-import { generateServiceProviderBookedEmail } from '../templates/createJobTemplate';
-import jwt from 'jsonwebtoken';
+import { Request, Response } from "express";
+import connection from "../db/connection";
+import mysql from "mysql2/promise";
+import { getDistance } from "geolib";
+import { send } from "../mailer";
+import { decodeToken } from "../helpers/utils";
+import { ServiceProviderDetails } from "../types";
+import { generateJobCompletionEmail } from "../templates/completeJobTemplate";
+import { generateServiceProviderBookedEmail } from "../templates/createJobTemplate";
+import jwt from "jsonwebtoken";
 
 export const addJob = async (req: Request, res: Response) => {
   const {
@@ -26,31 +26,31 @@ export const addJob = async (req: Request, res: Response) => {
     db.beginTransaction();
 
     const [data] = await db.query<mysql.ResultSetHeader>(
-      'SELECT * from service_provider_details where user_id = ?',
+      "SELECT * from service_provider_details where user_id = ?",
       [assigned_to_user]
     );
 
     const [customerData] = await db.query<mysql.ResultSetHeader>(
-      'SELECT * from customer_details where user_id = ?',
+      "SELECT * from customer_details where user_id = ?",
       [created_by_user]
     );
 
     if (data[0] === undefined || customerData[0] === undefined) {
       res.status(400).json({
-        error: 'Service Provider does not exist',
+        error: "Service Provider does not exist",
       });
       return;
     }
 
     if (data[0].booked) {
       res.status(401).json({
-        error: 'Service Provider is already booked',
+        error: "Service Provider is already booked",
       });
       return;
     }
 
     const [result] = await db.query<mysql.ResultSetHeader>(
-      'INSERT INTO jobs (district, city, latitude, longitude, service_type, assigned_to_user, created_by_user, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      "INSERT INTO jobs (district, city, latitude, longitude, service_type, assigned_to_user, created_by_user, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         district,
         city,
@@ -59,24 +59,24 @@ export const addJob = async (req: Request, res: Response) => {
         service_type,
         assigned_to_user,
         created_by_user,
-        'booked',
+        "booked",
       ]
     );
 
     const [user] = await db.query<mysql.ResultSetHeader>(
-      'UPDATE service_provider_details SET booked = ? where user_id = ?',
+      "UPDATE service_provider_details SET booked = ? where user_id = ?",
       [true, assigned_to_user]
     );
 
     const [customer] = await db.query<mysql.ResultSetHeader>(
-      'SELECT * from customer_details where user_id = ?',
+      "SELECT * from customer_details where user_id = ?",
       [created_by_user]
     );
 
     await db.commit();
 
     await send({
-      from: 'rapidrepairs1@zohomail.in',
+      from: "rapidrepairs1@zohomail.in",
       to: `${customer[0].email}`,
       subject: `Job ${result.insertId} Booked`,
       text: `Service Provider has been successfully booked for job ${result.insertId}!`,
@@ -90,12 +90,12 @@ export const addJob = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({
-      message: 'Job added successfully',
+      message: "Job added successfully",
     });
   } catch (error) {
     await db.rollback();
-    console.error('Error adding job:', error);
-    res.status(500).json({ error: 'Error adding job' });
+    console.error("Error adding job:", error);
+    res.status(500).json({ error: "Error adding job" });
   }
 };
 
@@ -106,15 +106,15 @@ export const deleteJob = async (req: Request, res: Response) => {
   try {
     db.beginTransaction();
 
-    await db.query('DELETE FROM jobs WHERE id = ?', [id]);
+    await db.query("DELETE FROM jobs WHERE id = ?", [id]);
 
     await db.commit();
 
-    res.status(200).json({ message: 'Job deleted successfully' });
+    res.status(200).json({ message: "Job deleted successfully" });
   } catch (error) {
     await db.rollback();
-    console.error('Error deleting job:', error);
-    res.status(500).json({ error: 'Error deleting job' });
+    console.error("Error deleting job:", error);
+    res.status(500).json({ error: "Error deleting job" });
   }
 };
 
@@ -125,37 +125,37 @@ export const completeJob = async (req: Request, res: Response) => {
   try {
     db.beginTransaction();
 
-    const [results] = await db.query('SELECT * FROM jobs WHERE job_id = ?', [
+    const [results] = await db.query("SELECT * FROM jobs WHERE job_id = ?", [
       id,
     ]);
 
-    if (results[0].status === 'complete') {
-      res.status(404).json({ error: 'Job already completed' });
+    if (results[0].status === "complete") {
+      res.status(404).json({ error: "Job already completed" });
       return;
     }
 
     if (results[0] === undefined) {
-      res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: "Job not found" });
       return;
     }
 
-    await db.query('UPDATE jobs SET status = ? WHERE job_id = ?', [
-      'complete',
+    await db.query("UPDATE jobs SET status = ? WHERE job_id = ?", [
+      "complete",
       id,
     ]);
 
     await db.query(
-      'UPDATE service_provider_details SET booked = ? WHERE user_id = ?',
+      "UPDATE service_provider_details SET booked = ? WHERE user_id = ?",
       [0, results[0].assigned_to_user]
     );
 
     const [customer] = await db.query(
-      'SELECT * FROM customer_details WHERE user_id = ?',
+      "SELECT * FROM customer_details WHERE user_id = ?",
       [results[0].created_by_user]
     );
 
     const [data] = await db.query(
-      'SELECT * FROM service_provider_details WHERE user_id = ?',
+      "SELECT * FROM service_provider_details WHERE user_id = ?",
       [results[0].assigned_to_user]
     );
 
@@ -165,14 +165,14 @@ export const completeJob = async (req: Request, res: Response) => {
       {
         user_id: results[0].created_by_user,
       },
-      process.env.SECRET_KEY || 'johnWick123'
+      process.env.SECRET_KEY || "johnWick123"
     );
 
     await send({
-      from: 'rapidrepairs1@zohomail.in',
+      from: "rapidrepairs1@zohomail.in",
       to: `${customer[0].email}`,
-      subject: 'Job Completed',
-      text: 'Your job has been successfully completed!',
+      subject: "Job Completed",
+      text: "Your job has been successfully completed!",
       html: generateJobCompletionEmail({
         customerName: customer[0].name,
         serviceProviderName: data[0].name,
@@ -180,11 +180,11 @@ export const completeJob = async (req: Request, res: Response) => {
         feedbackLink: `http://localhost:5173/feedback/${results[0].assigned_to_user}/${token}/${results[0].job_id}`,
       }),
     });
-    res.status(200).json({ message: 'Job completed successfully' });
+    res.status(200).json({ message: "Job completed successfully" });
   } catch (error) {
     await db.rollback();
-    console.error('Error completing job:', error);
-    res.status(500).json({ error: 'Error completing job' });
+    console.error("Error completing job:", error);
+    res.status(500).json({ error: "Error completing job" });
   }
 };
 
@@ -202,12 +202,11 @@ export const getNearbyServiceProviders = async (
     );
 
     if (rows[0] === undefined) {
-      res.status(404).json({ error: 'No service providers found' });
+      res.status(404).json({ error: "No service providers found" });
       return;
     }
 
     const providers = rows as ServiceProviderDetails[];
-    console.log(providers);
     const nearbyProviders = providers.filter(
       (provider: ServiceProviderDetails) => {
         const distance = getDistance(
@@ -229,15 +228,15 @@ export const getNearbyServiceProviders = async (
         }
       );
       if (furtherProviders.length === 0) {
-        res.status(404).json({ error: 'No jobs found' });
+        res.status(404).json({ error: "No jobs found" });
       }
       res.status(200).json(furtherProviders);
     }
 
     res.status(200).json(nearbyProviders);
   } catch (error) {
-    console.error('Error fetching nearby jobs:', error);
-    res.status(500).json({ error: 'Error fetching nearby jobs' });
+    console.error("Error fetching nearby jobs:", error);
+    res.status(500).json({ error: "Error fetching nearby jobs" });
   }
 };
 
@@ -245,15 +244,15 @@ const getQueryForUserType = (
   userType: string
 ): { userQuery: string; jobQuery: string } => {
   switch (userType) {
-    case 'admin':
+    case "admin":
       return {
         userQuery:
-          'SELECT id, name, email, userType FROM users WHERE email = ?',
-        jobQuery: 'SELECT * FROM jobs',
+          "SELECT id, name, email, userType FROM users WHERE email = ?",
+        jobQuery: "SELECT * FROM jobs",
       };
-    case 'customer':
+    case "customer":
       return {
-        userQuery: 'SELECT * FROM customer_details WHERE email = ?',
+        userQuery: "SELECT * FROM customer_details WHERE email = ?",
         jobQuery: `SELECT
                     jobs.*,
                     service_provider_details.name AS service_provider_name,
@@ -268,9 +267,9 @@ const getQueryForUserType = (
                   WHERE jobs.created_by_user = ?
                   AND jobs.status IN ('complete', 'booked');`,
       };
-    case 'service_provider':
+    case "service_provider":
       return {
-        userQuery: 'SELECT * FROM service_provider_details WHERE email = ?',
+        userQuery: "SELECT * FROM service_provider_details WHERE email = ?",
         jobQuery: `SELECT
                     jobs.*,
                     customer_details.name AS customer_name,
@@ -282,13 +281,13 @@ const getQueryForUserType = (
                   AND jobs.status IN ('booked');`,
       };
     default:
-      throw new Error('Invalid user type');
+      throw new Error("Invalid user type");
   }
 };
 
 export const getMyJobs = async (req: Request, res: Response) => {
   try {
-    const headerToken = req.headers['authorization'];
+    const headerToken = req.headers["authorization"];
     const decodedToken = decodeToken(headerToken);
     const email = decodedToken.email;
     const userType = decodedToken.userType;
@@ -299,7 +298,7 @@ export const getMyJobs = async (req: Request, res: Response) => {
     const [userRows] = await db.execute(userQuery, [email]);
 
     if (!userRows[0] === undefined) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const userId = userRows[0].user_id || userRows[0].id; // Adjust based on your schema

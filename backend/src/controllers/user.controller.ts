@@ -78,6 +78,7 @@ export const loginUser = async (req: Request, res: Response) => {
           {
             email: email,
             userType: user.userType,
+            user_id: user.id,
           },
           process.env.SECRET_KEY || "johnWick123",
           { expiresIn: "30d" }
