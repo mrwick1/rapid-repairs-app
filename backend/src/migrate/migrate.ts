@@ -306,7 +306,6 @@ const migrate = async () => {
    service_type ENUM('plumbing', 'electrical', 'carpentry', 'cleaning', 'roofing', 'painting') NOT NULL,
    years_of_experience INT,
    birth_date DATE,
-   booked BOOLEAN,
    city ENUM(
         'Alappuzha Town', 'Ambalappuzha', 'Cherthala', 'Haripad', 'Kayamkulam', 'Mavelikkara', 'Chengannur', 'Karthikappally', 'Muhamma', 'Punnapra', 'Thanneermukkom', 'Chennam Pallipuram', 'Thakazhi', 'Ramankary',
         'Kochi', 'Aluva', 'Kothamangalam', 'Perumbavoor', 'Muvattupuzha', 'Angamaly', 'North Paravur', 'Thrippunithura', 'Kakkanad', 'Kalamassery', 'Mattancherry', 'Cherai', 'Thiruvankulam', 'Koothattukulam', 'Piravom',
@@ -420,8 +419,8 @@ const migrate = async () => {
     VALUES (?, ?, ?, ?, ?, ?)
   `;
   const insertServiceProviderUserDetailsQuery = `
-    INSERT INTO service_provider_details (user_id, name, email, role, service_type, years_of_experience, birth_date, booked, city, qualification, district, phone_no,  latitude, longitude, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,'inactive')
+    INSERT INTO service_provider_details (user_id, name, email, role, service_type, years_of_experience, birth_date, city, qualification, district, phone_no, latitude, longitude, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'inactive')
   `;
 
   const insertFeedbackQuery = `
@@ -497,7 +496,6 @@ const migrate = async () => {
       getRandomServiceType(),
       faker.number.int({ min: 1, max: 20 }),
       faker.date.past({ years: 30 }).toISOString().split("T")[0],
-      false,
       city,
       faker.person.jobType(),
       district,
@@ -549,7 +547,6 @@ const migrate = async () => {
         getRandomServiceType(),
         faker.number.int({ min: 1, max: 20 }),
         faker.date.past({ years: 30 }).toISOString().split("T")[0],
-        false,
         city,
         faker.person.jobType(),
         district,

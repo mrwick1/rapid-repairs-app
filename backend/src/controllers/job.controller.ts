@@ -25,26 +25,31 @@ export const addJob = async (req: Request, res: Response) => {
   try {
     db.beginTransaction();
 
-    const [data] = await db.query<mysql.ResultSetHeader>(
-      "SELECT * from service_provider_details where user_id = ?",
-      [assigned_to_user]
+    const [check] = await db.execute<mysql.RowDataPacket[]>(
+      "SELECT * FROM jobs WHERE assigned_to_user = ? AND created_by_user = ? AND status = 'booked' AND service_type = ?",
+      [assigned_to_user, created_by_user, service_type]
     );
 
-    const [customerData] = await db.query<mysql.ResultSetHeader>(
-      "SELECT * from customer_details where user_id = ?",
-      [created_by_user]
-    );
-
-    if (data[0] === undefined || customerData[0] === undefined) {
+    if (check.length > 0) {
       res.status(400).json({
-        error: "Service Provider does not exist",
+        error: "Job already exists",
       });
       return;
     }
 
-    if (data[0].booked) {
-      res.status(401).json({
-        error: "Service Provider is already booked",
+    const [data] = await db.query<mysql.RowDataPacket[]>(
+      "SELECT * from service_provider_details where user_id = ?",
+      [assigned_to_user]
+    );
+
+    const [customerData] = await db.query<mysql.RowDataPacket[]>(
+      "SELECT * from customer_details where user_id = ?",
+      [created_by_user]
+    );
+
+    if (data.length < 0 || customerData.length < 0) {
+      res.status(400).json({
+        error: "Service Provider does not exist",
       });
       return;
     }
@@ -61,11 +66,6 @@ export const addJob = async (req: Request, res: Response) => {
         created_by_user,
         "booked",
       ]
-    );
-
-    const [user] = await db.query<mysql.ResultSetHeader>(
-      "UPDATE service_provider_details SET booked = ? where user_id = ?",
-      [true, assigned_to_user]
     );
 
     const [customer] = await db.query<mysql.ResultSetHeader>(
@@ -144,11 +144,6 @@ export const completeJob = async (req: Request, res: Response) => {
       id,
     ]);
 
-    await db.query(
-      "UPDATE service_provider_details SET booked = ? WHERE user_id = ?",
-      [0, results[0].assigned_to_user]
-    );
-
     const [customer] = await db.query(
       "SELECT * FROM customer_details WHERE user_id = ?",
       [results[0].created_by_user]
@@ -197,8 +192,8 @@ export const getNearbyServiceProviders = async (
   try {
     const db = await connection();
     const [rows] = await db.query(
-      "SELECT * FROM service_provider_details where city = ? and district = ? and service_type = ? and booked = ? and status = 'active'",
-      [city, district, serviceType, 0]
+      "SELECT * FROM service_provider_details where city = ? and district = ? and service_type = ? and status = 'active'",
+      [city, district, serviceType]
     );
 
     if (rows[0] === undefined) {

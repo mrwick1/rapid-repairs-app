@@ -167,7 +167,6 @@ export const updateServiceProvider = async (req: Request, res: Response) => {
     qualification,
     district,
     phone_no,
-    status,
   } = req.body;
 
   try {
@@ -175,7 +174,7 @@ export const updateServiceProvider = async (req: Request, res: Response) => {
 
     const sql = `
       UPDATE service_provider_details
-      SET name = ?, email = ?, role = ?, service_type = ?, years_of_experience = ?, birth_date = ?, city = ?, qualification = ?, district = ?, phone_no = ?, status = ?
+      SET name = ?, email = ?, role = ?, service_type = ?, years_of_experience = ?, birth_date = ?, city = ?, qualification = ?, district = ?, phone_no = ?
       WHERE user_id = ?
     `;
     const values = [
@@ -189,7 +188,6 @@ export const updateServiceProvider = async (req: Request, res: Response) => {
       qualification ? qualification : null,
       district ? district : null,
       phone_no ? phone_no : null,
-      status ? status : null,
       userId,
     ];
 
