@@ -63,7 +63,6 @@ export const loginUser = async (req: Request, res: Response) => {
     const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
-    console.log(rows);
 
     if (Array.isArray(rows) && rows.length === 0) {
       res.status(404).json({

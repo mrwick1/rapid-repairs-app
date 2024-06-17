@@ -76,7 +76,7 @@ export const addJob = async (req: Request, res: Response) => {
     await db.commit();
 
     await send({
-      from: "rapidrepairs1@zohomail.in",
+      from: process.env.MAIL_USER,
       to: `${customer[0].email}`,
       subject: `Job ${result.insertId} Booked`,
       text: `Service Provider has been successfully booked for job ${result.insertId}!`,
@@ -164,7 +164,7 @@ export const completeJob = async (req: Request, res: Response) => {
     );
 
     await send({
-      from: "rapidrepairs1@zohomail.in",
+      from: process.env.MAIL_USER,
       to: `${customer[0].email}`,
       subject: "Job Completed",
       text: "Your job has been successfully completed!",
