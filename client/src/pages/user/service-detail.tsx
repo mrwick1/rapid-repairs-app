@@ -257,6 +257,7 @@ interface Location {
 }
 
 const ServiceDetailPage = () => {
+  const { authenticated } = useAuthStore();
   const { id } = useParams();
   const userId = useAuthStore((state) => state.user?.user_id);
   const [district, setDistrict] = useState("");
@@ -323,7 +324,9 @@ const ServiceDetailPage = () => {
   });
 
   const handleGetLocation = () => {
-    if (navigator.geolocation) {
+    if (!authenticated) {
+      window.location.href = "/sign-in";
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLocation({
@@ -485,7 +488,7 @@ const ServiceDetailPage = () => {
               />
             </div>
           </div>
-          <div className="row gy-4">
+          <div className="row gy-4 p-4">
             {isLoading || isAddingJob ? (
               <Loader />
             ) : (

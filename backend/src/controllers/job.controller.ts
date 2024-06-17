@@ -8,6 +8,7 @@ import { ServiceProviderDetails } from "../types";
 import { generateJobCompletionEmail } from "../templates/completeJobTemplate";
 import { generateServiceProviderBookedEmail } from "../templates/createJobTemplate";
 import jwt from "jsonwebtoken";
+import { generateServiceProviderNotificationEmail } from "../templates/notifyJobTemplate";
 
 export const addJob = async (req: Request, res: Response) => {
   const {
@@ -78,7 +79,7 @@ export const addJob = async (req: Request, res: Response) => {
     await send({
       from: process.env.MAIL_USER,
       to: `${customer[0].email}`,
-      subject: `Job ${result.insertId} Booked`,
+      subject: `${service_type} Booked`,
       text: `Service Provider has been successfully booked for job ${result.insertId}!`,
       html: generateServiceProviderBookedEmail({
         customerName: customer[0].name,
@@ -86,6 +87,20 @@ export const addJob = async (req: Request, res: Response) => {
         serviceProviderName: data[0].name,
         serviceProviderEmail: data[0].email,
         serviceProviderPhone: data[0].phone_no,
+      }),
+    });
+
+    await send({
+      from: process.env.MAIL_USER,
+      to: `${data[0].email}`,
+      subject: `${service_type} Booked`,
+      text: `You have been successfully booked for job ${result.insertId}!`,
+      html: generateServiceProviderNotificationEmail({
+        customerName: customer[0].name,
+        serviceType: service_type,
+        serviceProviderName: data[0].name,
+        customerEmail: customer[0].email,
+        customerPhone: customer[0].phone,
       }),
     });
 
@@ -191,12 +206,13 @@ export const getNearbyServiceProviders = async (
 
   try {
     const db = await connection();
-    const [rows] = await db.query(
-      "SELECT * FROM service_provider_details where city = ? and district = ? and service_type = ? and status = 'active'",
+
+    const [rows] = await db.query<mysql.RowDataPacket[]>(
+      "SELECT * FROM service_provider_details where city = ? OR district = ? AND service_type = ? AND status = 'active'",
       [city, district, serviceType]
     );
 
-    if (rows[0] === undefined) {
+    if (rows.length === 0) {
       res.status(404).json({ error: "No service providers found" });
       return;
     }
@@ -208,27 +224,20 @@ export const getNearbyServiceProviders = async (
           { latitude: latitude, longitude: longitude },
           { latitude: provider.latitude, longitude: provider.longitude }
         );
-        return distance <= 100;
+        return distance <= 500;
       }
     );
 
-    if (nearbyProviders.length === 0) {
-      const furtherProviders = providers.filter(
-        (provider: ServiceProviderDetails) => {
-          const distance = getDistance(
-            { latitude: latitude, longitude: longitude },
-            { latitude: provider.latitude, longitude: provider.longitude }
-          );
-          return distance <= 1000;
-        }
-      );
-      if (furtherProviders.length === 0) {
-        res.status(404).json({ error: "No jobs found" });
-      }
-      res.status(200).json(furtherProviders);
+    const mergedProviders = Array.from(
+      new Set([...nearbyProviders, ...providers])
+    );
+
+    if (mergedProviders.length === 0) {
+      res.status(404).json({ error: "No service providers found " });
+      return;
     }
 
-    res.status(200).json(nearbyProviders);
+    res.status(200).json(mergedProviders);
   } catch (error) {
     console.error("Error fetching nearby jobs:", error);
     res.status(500).json({ error: "Error fetching nearby jobs" });
@@ -296,7 +305,7 @@ export const getMyJobs = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const userId = userRows[0].user_id || userRows[0].id; // Adjust based on your schema
+    const userId = userRows[0].user_id || userRows[0].id;
     const [jobRows] = await db.execute(jobQuery, [userId]);
 
     res.status(200).json(jobRows);

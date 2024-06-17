@@ -1,15 +1,16 @@
-export function generateJobCompletionEmail(data: {
-  customerName: string;
+export function generateServiceProviderNotificationEmail(data: {
   serviceProviderName: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
   serviceType: string;
-  feedbackLink: string;
 }): string {
   return `<!DOCTYPE html>
     <html lang="en">
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Completed</title>
+    <title>New Booking Notification</title>
     <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -55,32 +56,27 @@ export function generateJobCompletionEmail(data: {
     .details span {
         font-weight: 600;
     }
-    .button {
-        display: inline-block;
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 5px;
-        margin-top: 20px;
-    }
     </style>
     </head>
     <body>
     <div class="container">
-        <div class="header">
-        <h1>${data.serviceType} Completed</h1>
-        </div>
-      <div class="content">
-      <p>Dear <span>${data.customerName}</span>,</p>
-      <p>We are pleased to inform you that the ${data.serviceType} job has been successfully completed by Service Provider: ${data.serviceProviderName}.</p>
-      <p>We hope you are satisfied with the service provided. If you have any feedback, please do not hesitate to let us know.</p>
-      <a href="${data.feedbackLink}" class="button">Leave Feedback</a>
+      <div class="header">
+        <h1>New Booking for ${data.serviceType}</h1>
       </div>
-    <div class="footer">
-    <p>&copy; 2024 Rapid Repairs. All rights reserved.</p>
-    </div>
+      <div class="content">
+        <p>Dear <span>${data.serviceProviderName}</span>,</p>
+        <p>We are pleased to inform you that you have been booked for a new service. Below are the details:</p>
+        <div class="details">
+          <p><span>Customer Name:</span> ${data.customerName}</p>
+          <p><span>Email:</span> ${data.customerEmail}</p>
+          <p><span>Phone:</span> ${data.customerPhone}</p>
+        </div>
+        <p>Please contact the customer to confirm the details and schedule the service.</p>
+        <p>Thank you for your service!</p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2024 Rapid Repairs. All rights reserved.</p>
+      </div>
     </div>
     </body>
     </html>`;
