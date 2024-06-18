@@ -141,6 +141,7 @@ const Upcoming = () => {
               <th>Customer Name</th>
               <th>Location</th>
               <th>ServiceType </th>
+              <th>Phone No</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -159,6 +160,7 @@ const Upcoming = () => {
                     </a>
                   </td>
                   <td>{item.service_type}</td>
+                  <td>{item.customer_phone}</td>
                   <td>
                     <input
                       onClick={() => {
