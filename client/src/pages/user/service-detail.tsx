@@ -494,32 +494,43 @@ const ServiceDetailPage = () => {
             ) : (
               <>
                 {nearbyProviders?.map((provider: NearbyProviderDetails) => (
-                  <div className="col-lg-4">
-                    <div className="card flex items-center justify-center p-4">
-                      <div className="card-img flex justify-center pb-2">
+                  <div className="col-lg-4 p-4">
+                    <div className="card flex flex-col items-center bg-white shadow-lg rounded-lg p-6">
+                      <div className="card-img flex justify-center mb-4">
                         <img
                           src="https://cdn-icons-png.flaticon.com/512/4715/4715329.png"
                           width="200"
                           alt="avatar"
-                          className="img-fluid"
+                          className="rounded-full shadow-md"
                         />
                       </div>
-                      <h4 className="text-sm text-center p-2">
+                      <h4 className="text-lg font-semibold text-center mb-2">
                         {provider.name}
                       </h4>
-                      <div className="flex flex-row justify-center items-center gap-1">
+                      <div className="flex items-center gap-2 mb-4">
                         <img
                           src="/assets/img/star.png"
-                          alt=""
+                          alt="star"
                           className="h-6 w-6"
                         />
-                        <span className="text-[#F5BD02] font-normal text-lg">
-                          {Number(provider.average_rating).toFixed(0)}
+                        <span className="text-yellow-500 text-xl font-medium">
+                          {Number(provider.average_rating).toFixed(1)}
                         </span>
                       </div>
+                      <div className="text-center text-sm text-gray-600 mb-4 space-y-2">
+                        <p className="font-medium">
+                          {provider.city}, {provider.district}
+                        </p>
+                        <p className="font-light">
+                          {provider.years_of_experience} years of experience
+                        </p>
+                        <p className="font-normal">{provider.role}</p>
+                        <p className="font-light italic">
+                          {provider.qualification}
+                        </p>
+                      </div>
                       <button
-                        className="button-call-now"
-                        style={{ backgroundColor: "blue", color: "white" }}
+                        className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
                         onClick={() => handleBookJob(provider)}
                       >
                         Book Now

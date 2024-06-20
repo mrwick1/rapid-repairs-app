@@ -208,7 +208,7 @@ export const getNearbyServiceProviders = async (
     const db = await connection();
 
     const [rows] = await db.query<mysql.RowDataPacket[]>(
-      "SELECT * FROM service_provider_details where city = ? OR district = ? AND service_type = ? AND status = 'active'",
+      "SELECT * FROM service_provider_details WHERE (city = ? OR district = ?) AND service_type = ? AND status = 'active'",
       [city, district, serviceType]
     );
 

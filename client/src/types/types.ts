@@ -58,6 +58,7 @@ export interface Job {
   status?: JobStatus;
   service_type: ServiceType;
   assigned_to_user?: number | null;
+  created_by_user?: number | null;
   latitude?: number | null;
   longitude?: number | null;
 }
@@ -94,7 +95,6 @@ export type NearbyProviderDetails = {
     | "painting";
   years_of_experience: number;
   birth_date: string;
-  booked: number;
   city: string;
   qualification: string;
   district: string;
